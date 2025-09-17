@@ -257,6 +257,14 @@ fastify.register(async (fastify) => {
 
         session.onEvent('contentEnd', (data) => {
             console.log('Content end received');
+            if (data["stopReason"] == "INTERRUPTED") {
+                //since you received more media send a clear message
+                const clearMessage = {
+                    "event": "clear",
+                    "streamSid": session.streamSid
+                }
+                connection.send(JSON.stringify(clearMessage));
+            }
             //socket.emit('contentEnd', data);
         });
 
