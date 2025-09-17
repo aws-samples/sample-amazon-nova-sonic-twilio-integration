@@ -6,7 +6,10 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { S2SBidirectionalStreamClient, StreamSession } from './nova-client';
 import {mulaw} from 'alawmulaw';
 import { Twilio, twiml } from "twilio"
+import { readFileSync } from 'node:fs';
 
+//read the audio bytes from hello.pcm file
+const helloAudioBytes = readFileSync('audio/hello.pcm');
 
 // Find your Account SID and Auth Token at twilio.com/console
 // and set the environment variables. See http://twil.io/secure
@@ -77,7 +80,7 @@ fastify.all('/outbound-call', async (request, reply) => {
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
                           <Response>
-                              <Say>Please wait while we connect your call to Amazon Nova Sonic A.I. speech to speech system </Say>
+                              <Say language="en-US" voice="Polly.Matthew-Generative">Please wait while we connect your call to Amazon Nova Sonic A.I. speech to speech system </Say>
                               <Pause length="1"/>
                               <Say>O.K. you can start talking!</Say>
                               <Connect>
@@ -103,9 +106,7 @@ fastify.all('/incoming-call', async (request, reply) => {
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
                           <Response>
-                              <Say>Please wait while we connect your call to Amazon Nova Sonic A.I. speech to speech system </Say>
-                              <Pause length="1"/>
-                              <Say>O.K. you can start talking!</Say>
+                              <Say language="en-US" voice="Polly.Matthew-Generative">Please wait while we connect your call to Amazon Nova Sonic A.I. speech to speech system </Say>
                               <Connect>
                                 <Stream url="wss://${request.headers.host}/media-stream" />
                               </Connect>
@@ -155,6 +156,9 @@ fastify.register(async (fastify) => {
                         session.streamSid = data.streamSid;
                         callSid = data.start.callSid; //call sid to update while redirecting it to SIP endpoint
                         console.log(`Stream started streamSid: ${session.streamSid}, callSid: ${callSid}`);
+                        
+                        //send the audio bytes that say "hello" as to mimick the user greeting to allow model to speak first
+                        await session.streamAudio(helloAudioBytes);
                         break;
 
                     case 'media':            
