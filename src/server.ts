@@ -9,7 +9,7 @@ import { Twilio, twiml } from "twilio"
 import { readFileSync } from 'node:fs';
 
 //read the audio bytes from hello.pcm file
-const helloAudioBytes = readFileSync('audio/hello.pcm');
+const helloAudioBytes = readFileSync('assets/hello.pcm');
 
 // Find your Account SID and Auth Token at twilio.com/console
 // and set the environment variables. See http://twil.io/secure
